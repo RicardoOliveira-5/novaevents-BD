@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(${club.name})}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container mt-5">
+
+    <!-- Club Card -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h1 class="fw-bold mb-1" th:text="${club.name}">Club Name</h1>
+                    <span class="badge bg-secondary fs-6" th:text="${club.category}">Category</span>
+                </div>
+                <a th:href="@{/clubs/{id}/events/new(id=${club.id})}"
+                   class="btn btn-success">
+                    <i>+</i> Add Event
+                </a>
+            </div>
+
+            <hr/>
+
+            <!-- Description -->
+            <p class="text-muted" th:text="${club.description}">
+                Club description goes here...
+            </p>
+
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Events Table -->
+<div class="mt-4">
+    <h4 class="fw-bold mb-3">Club Events</h4>
+
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Location</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="event : ${events}">
+            <td>
+                <a th:href="@{/clubs/{clubId}/events/{eventId}
+                    (clubId=${club.id},eventId=${event.id})}"
+                   th:text="${event.name}">
+                </a>
+            </td>            <td th:text="${event.type}">Type</td>
+            <td th:text="${event.date}">Date</td>
+            <td th:text="${event.location}">Location</td>
+        </tr>
+
+        <!-- Caso não existam eventos -->
+        <tr th:if="${#lists.isEmpty(events)}">
+            <td colspan="4" class="text-center text-muted">
+                No events for this club yet.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

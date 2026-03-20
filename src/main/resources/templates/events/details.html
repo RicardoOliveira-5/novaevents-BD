@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Event Details - ' + ${event.name}">Event Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+<head th:replace="/layout :: head('Events')"></head>
+
+<div th:replace="/layout" :: navbar></div>
+<x></x>
+
+<main class="container mx-auto p-8">
+    <h1 class="text-3xl font-bold mb-6" th:text="${event.name}">Event Name</h1>
+
+    <div class="bg-white border rounded shadow-sm p-6 space-y-4">
+        <div>
+            <span class="font-semibold text-gray-700">Club: </span>
+            <span class="text-gray-800" th:text="${event.clubName}">Club Name</span>
+        </div>
+
+        <div>
+            <span class="font-semibold text-gray-700">Date: </span>
+            <span class="text-gray-800" th:text="${#temporals.format(event.date,'dd MMM yyyy')}">10 Mar 2026</span>
+        </div>
+
+        <div>
+            <span class="font-semibold text-gray-700">Type: </span>
+            <span class="bg-gray-500 text-white text-xs px-2 py-1 rounded uppercase font-bold"
+                  th:text="${event.type}">TYPE</span>
+        </div>
+
+        <div th:if="${event.location != null}">
+            <span class="font-semibold text-gray-700">Location: </span>
+            <span class="text-gray-800" th:text="${event.location}">Location</span>
+        </div>
+
+
+        <div class="flex gap-2 mt-4">
+            <a th:href="@{/clubs/{id}/events/{eventId}/edit(id=${event.clubId}, eventId=${event.id})}"
+               class="border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-50">Edit</a>
+
+            <a th:href="@{/clubs/{id}/events/{eventId}/delete(id=${event.clubId}, eventId=${event.id})}"
+               class="border border-red-400 text-red-500 px-4 py-2 rounded hover:bg-red-50">Delete</a>
+
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

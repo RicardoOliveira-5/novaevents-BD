@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Not Found')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+<div class="container mt-5">
+    <h1>404 - Not Found</h1>
+    <p th:text="${message}">Resource not found</p>
+    <a href="/clubs" class="btn btn-primary">Go Back</a>
+</div>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

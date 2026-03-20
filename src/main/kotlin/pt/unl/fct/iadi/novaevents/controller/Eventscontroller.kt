@@ -1,0 +1,166 @@
+package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller
+
+import jakarta.validation.Valid
+import org.springframework.stereotype.Controller
+import org.springframework.ui.ModelMap
+import org.springframework.validation.BindingResult
+import org.springframework.web.bind.annotation.*
+import pt.unl.fct.iadi.novaevents.controller.dto.EventForm
+import pt.unl.fct.iadi.novaevents.controller.dto.EventUpdateForm
+import pt.unl.fct.iadi.novaevents.controller.dto.EventsResponse
+import pt.unl.fct.iadi.novaevents.model.Event
+import pt.unl.fct.iadi.novaevents.model.EventType
+import pt.unl.fct.iadi.novaevents.service.ClubsService
+import pt.unl.fct.iadi.novaevents.service.EventsService
+import java.time.LocalDate
+
+@Controller
+class Eventscontroller(private val eventsService: EventsService, private val clubService: ClubsService) {
+
+    @GetMapping("/events")
+    fun allEvents(
+        @RequestParam(required = false) type: EventType?,
+        @RequestParam(required = false) clubId: Long?,
+        @RequestParam(required = false) start: LocalDate?,
+        @RequestParam(required = false) end: LocalDate?,
+        model: ModelMap
+    ): String {
+        val events = eventsService.getEventsForClub(type, clubId, start, end)
+        model["events"] = events
+        return "events/listEvents"
+    }
+    @GetMapping("/clubs/{id}/events/new")
+    fun showCreateEventForm(@PathVariable id: Long, model: ModelMap): String {
+        val club = clubService.clubDetails(id)
+        model["club"] = club
+        model["eventForm"] = EventForm()
+        model["eventTypes"] = EventType.entries.toTypedArray()
+        return "events/form"
+    }
+
+    @PostMapping("/clubs/{id}/events")
+    fun createEvent(
+        @PathVariable id: Long,
+        @Valid @ModelAttribute("eventForm") form: EventForm,
+        bindingResult: BindingResult,
+        model: ModelMap
+    ): String {
+        if (bindingResult.hasErrors()) {
+            model["club"] = clubService.clubDetails(id)
+            model["eventTypes"] = EventType.entries.toTypedArray()
+            return "events/form"
+        }
+        if (eventsService.nameExists(form.name!!, id)) {
+            bindingResult.rejectValue("name", "duplicate", "An event with this name already exists")
+            model["club"] = clubService.clubDetails(id)
+            model["eventTypes"] = EventType.entries.toTypedArray()
+            return "events/form"
+        }
+        val created = eventsService.createEvent(form, id)
+        return "redirect:/clubs/$id/events/${created.id}"
+    }
+
+    @GetMapping("/clubs/{id}/events/{eventId}/edit")
+    fun showEditEventForm(@PathVariable id: Long, @PathVariable eventId: Long, model: ModelMap): String {
+        val event = eventsService.findById(eventId)
+        val club = clubService.clubDetails(id)
+
+        val eventForm = EventForm(
+            name = event.name,
+            date = event.date,
+            type = event.type,
+            location = event.location,
+            description = event.description
+        )
+        model["club"] = club
+        model["event"] = event
+        model["eventForm"] = eventForm
+        model["eventUpdateForm"] = EventUpdateForm(
+            name = event.name,
+            date = event.date,
+            type = event.type,
+            location = event.location,
+            description = event.description
+        )
+        model["eventTypes"] = EventType.entries.toTypedArray()
+        return "events/editForm"
+    }
+
+    @PutMapping("/clubs/{id}/events/{eventId}")
+    fun editEvent(
+        @PathVariable id: Long,
+        @PathVariable eventId: Long,
+        @Valid @ModelAttribute("eventUpdateForm") form: EventUpdateForm,
+        bindingResult: BindingResult,
+        model: ModelMap
+    ): String {
+        if (bindingResult.hasErrors()) {
+            model["club"] = clubService.clubDetails(id)
+            model["event"] = eventsService.findById(eventId)
+            model["eventTypes"] = EventType.entries.toTypedArray()
+            return "events/editForm"
+        }
+        if (eventsService.nameEditExists(form.name!!, id, eventId)) {
+            bindingResult.rejectValue("name", "duplicate", "An event with this name already exists")
+            model["club"] = clubService.clubDetails(id)
+            model["event"] = eventsService.findById(eventId)
+            model["eventTypes"] = EventType.entries.toTypedArray()
+            return "events/editForm"
+        }
+        val event = eventsService.findById(eventId)
+        val updatedEvent = Event(
+            id = event.id,
+            clubId = event.clubId,
+            name = form.name ?: event.name,
+            date = form.date ?: event.date,
+            type = form.type ?: event.type,
+            location = form.location ?: event.location,
+            description = form.description ?: event.description
+        )
+        eventsService.updateEvent(updatedEvent)
+        return "redirect:/clubs/$id/events/${updatedEvent.id}"
+    }
+
+@GetMapping("/clubs/{id}/events/{eventId}")
+    fun eventDetails(@PathVariable id: Long,@PathVariable eventId: Long, model: ModelMap): String {
+        val event = eventsService.findById(eventId)
+    val eventResponse = EventsResponse(
+        id = event.id,
+        name = event.name,
+        clubId = event.clubId,
+        clubName = clubService.clubDetails(event.clubId).name,
+        date = event.date,
+        type = event.type,
+        location = event.location
+    )
+        model["event"] = eventResponse
+        return "events/details"
+    }
+
+
+    @DeleteMapping("/clubs/{id}/events/{eventId}")
+    fun deleteEvent(@PathVariable eventId: Long, @PathVariable id: Long): String {
+        eventsService.deleteEvent(eventId)
+        return "redirect:/clubs/$id"  // sem /events
+    }
+
+    @GetMapping("/clubs/{id}/events/{eventId}/delete")
+    fun showDeleteConfirmation(
+        @PathVariable eventId: Long,
+        model: ModelMap
+    ): String {
+        val event: Event = eventsService.findById(eventId)
+        val eventResponse = EventsResponse(
+            id = event.id,
+            name = event.name,
+            clubId = event.clubId,
+            clubName = clubService.clubDetails(event.clubId).name,
+            date = event.date,
+            type = event.type,
+            location = event.location
+        )
+        model.addAttribute("event", eventResponse)
+        return "events/delete"
+    }
+
+}

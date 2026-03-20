@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Campus Clubs - All Events</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+<head th:replace="/layout :: head('Events')"></head>
+
+<div th:replace="/layout" :: navbar></div>
+
+<main class="container mx-auto p-8">
+    <h1 class="text-3xl font-bold mb-8">All Events</h1>
+
+    <!-- Filter Section -->
+    <div class="bg-white border rounded shadow-sm mb-8">
+        <div class="bg-gray-50 p-3 border-b text-gray-600 text-sm">Filter Events</div>
+        <form action="/events" method="get" class="p-4 flex gap-4 flex-wrap items-end">
+            <div class="col-md-3">
+                <label>Type</label>
+                <select name="type" class="form-control">
+                    <option value="">All</option>
+                    <option value="MEETING">MEETING</option>
+                    <option value="WORKSHOP">WORKSHOP</option>
+                    <option value="TALK">TALK</option>
+                    <option value="SOCIAL">SOCIAL</option>
+                    <option value="COMPETITION">COMPETITION</option>
+                    <option value="OTHER">OTHER</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label>Club Name</label>
+                <select name="clubId" class="form-control">
+                    <option value="">All</option>
+                    <option value="1">Chess Club</option>
+                    <option value="2">Robotics Club</option>
+                    <option value="3">Photography Club</option>
+                    <option value="4">Hiking & Outdoors Club</option>
+                    <option value="5">Film Society</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label>Start</label>
+                <input type="date" name="start" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label>End</label>
+                <input type="date" name="end" class="form-control">
+            </div>
+
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">
+                    Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Events Table -->
+    <div class="overflow-hidden border rounded shadow-sm">
+        <table class="w-full text-left bg-white border-collapse">
+            <thead class="bg-neutral-800 text-white uppercase text-sm">
+            <tr>
+                <th class="p-4 font-semibold">Name</th>
+                <th class="p-4 font-semibold">Club</th>
+                <th class="p-4 font-semibold">Date</th>
+                <th class="p-4 font-semibold">Type</th>
+                <th class="p-4 font-semibold">Location</th>
+                <th class="p-4 font-semibold text-center">Actions</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y">
+            <tr th:each="event : ${events}" class="hover:bg-gray-50 transition-colors">
+                <td class="p-4">
+                    <!-- Link para detalhes usando apenas eventId -->
+                    <a th:href="@{/clubs/{clubid}/events/{id}(id=${event.id}, clubid=${event.clubId})}" th:text="${event.name}" class="text-blue-600 hover:underline">Event Name</a>
+                </td>
+
+                <td class="p-4 text-gray-700" th:text="${#temporals.format(event.date, 'dd MMM yyyy')}">10 Mar 2026</td>
+                <td class="p-4">
+                    <span class="bg-gray-500 text-white text-[10px] px-2 py-1 rounded font-bold uppercase"
+                          th:text="${event.type}">TYPE</span>
+                </td>
+                <td class="p-4 text-gray-700" th:text="${event.location}">Location</td>
+                <td class="p-4 text-center">
+                    <div class="flex justify-center gap-2">
+
+                        <!-- Links de edição e delete apenas com eventId -->
+                        <a th:href="@{/clubs/{clubid}/events/{id}/edit (id=${event.id}, clubid=${event.clubid})}"
+                           class="border border-blue-600 text-blue-600 px-3 py-1 rounded text-sm hover:bg-blue-50">Edit</a>
+                        <a th:href="@{/clubs/{clubid}/events/{id}/delete (id=${event.id}, clubid=${event.clubid})}"
+                           class="border border-red-400 text-red-500 px-3 py-1 rounded text-sm hover:bg-red-50">Delete</a>
+
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>
