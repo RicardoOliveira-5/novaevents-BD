@@ -1,13 +1,18 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.service
+package pt.unl.fct.iadi.novaevents.service
 
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import pt.unl.fct.iadi.novaevents.model.Club
-import pt.unl.fct.iadi.novaevents.model.ClubCategory
+import pt.unl.fct.iadi.novaevents.repository.ClubRepository
 
 
 @Service
-class ClubsService {
-    // Cria 5 clubes, de chess, robotics, music, photography, hiking and outdoors club and film society club
+class ClubsService(
+    private val clubRepository: ClubRepository
+
+) {
+
+    /*
     val clubs = mutableListOf(
         Club(1, "Chess Club", "The Robotics Club is the place to turn ideas into machines", (ClubCategory.SOCIAL)),
         Club(2, "Robotics Club", category = ClubCategory.ACADEMIC, description = "The Robotics Club is the place to turn ideas into machines"),
@@ -16,11 +21,16 @@ class ClubsService {
         Club(5, "Film Society Club", "A club for film lovers", (ClubCategory.CULTURAL))
     )
 
+     */
+
     fun getAllClubs(): List<Club> {
-        return clubs
+        return clubRepository.findAll()
     }
     fun clubDetails(clubId: Long?): Club {
-        return clubs.find { it.id == clubId } ?: throw ClubNotFoundException("Club not found")
+        return clubId?.let { id ->
+            clubRepository.findById(id)
+                .orElseThrow { EntityNotFoundException("Club not found") }
+        } ?: throw IllegalArgumentException("Club ID is required")
+    }
     }
 
-}

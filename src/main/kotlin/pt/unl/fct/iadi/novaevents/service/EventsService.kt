@@ -1,76 +1,103 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.service
+package pt.unl.fct.iadi.novaevents.service
 
-import org.springframework.cglib.core.Local
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
-import pt.unl.fct.iadi.novaevents.controller.dto.EventForm
-import pt.unl.fct.iadi.novaevents.controller.dto.EventsResponse
 import pt.unl.fct.iadi.novaevents.model.Event
-import pt.unl.fct.iadi.novaevents.model.EventType
+import pt.unl.fct.iadi.novaevents.repository.ClubRepository
+import pt.unl.fct.iadi.novaevents.repository.EventRepository
+import pt.unl.fct.iadi.novaevents.repository.EventTypeRepository
 import java.time.LocalDate
 
 
 @Service
-class EventsService {
+class EventsService(
+    private val eventRepository: EventRepository,
+    private val clubRepository: ClubRepository,
+    private val eventTypeRepository: EventTypeRepository
+) {
+    fun getEventsForClub(
+        typeId: Long? = null,
+        clubId: Long?,
+        start: LocalDate?,
+        end: LocalDate?
+    ): List<Event> {
+        var events = eventRepository.findAll()
 
-    val events = mutableListOf<Event>(
-        Event(1,1,"Beginner's Chess Workshop", LocalDate.parse("2026-03-16"), "Room A101", EventType.WORKSHOP),
-        Event(2, 1, "Spring Chess Tournament", LocalDate.parse("2025-10-20"), "Room A", EventType.COMPETITION),
-        Event(3, 2, "A workshop for robotics enthusiasts", LocalDate.parse("2025-11-15"), "Lab 3", EventType.WORKSHOP),
-        Event(4, 3, "A photo walk for photography enthusiasts", LocalDate.parse("2025-12-05"), "Campus Garden", EventType.SOCIAL),
-        Event(5, 4, "A hiking trip", LocalDate.parse("2025-09-10"), null, EventType.SOCIAL),
-        Event(6, 5, "A film Screening", LocalDate.parse("2025-10-30"), "Auditorium", EventType.OTHER),
+        if (clubId != null) events = events.filter { it.club?.id == clubId }
+        if (typeId != null) events = events.filter { it.type?.id == typeId }
+        if (start != null) events = events.filter { !it.date.isBefore(start) }
+        if (end != null) events = events.filter { !it.date.isAfter(end) }
 
-    )
-
-
-
-    fun getEventsForClub(type: EventType? = null,clubId: Long?, start: LocalDate?, end: LocalDate? ): List<Event> {
-        return events.filter { event ->
-            (clubId == null || event.clubId == clubId) &&
-            (type == null || event.type == type) &&
-            (start == null || !event.date.isBefore(start)) &&
-            (end == null || !event.date.isAfter(end))
-        }
+        return events
     }
+
     fun findById(id: Long): Event {
-        return events.firstOrNull { it.id == id }
-            ?: throw NoSuchElementException("Event with id $id not found")
+        return eventRepository.findById(id)
+            .orElseThrow { EntityNotFoundException("Event with id $id not found") }
     }
 
-    fun createEvent(event: EventForm, id: Long): Event {
-        val newId = (events.maxOfOrNull { it.id } ?: 0) + 1
-        val newEvent = Event(
-            id = newId,
-            clubId = id,
-            name = event.name ?: throw IllegalArgumentException("Name is required"),
-            date = event.date ?: throw IllegalArgumentException("Date is required"),
-            type = event.type ?: throw IllegalArgumentException("Type is required"),
-            location = event.location,
-            description = event.description
+    fun createEvent(
+        name: String,
+        date: LocalDate,
+        typeId: Long,
+        clubId: Long,
+        location: String? = null,
+        description: String? = null
+    ): Event {
+
+        val club = clubRepository.findById(clubId)
+            .orElseThrow { EntityNotFoundException("Club not found") }
+
+        val type = eventTypeRepository.findById(typeId)
+            .orElseThrow { EntityNotFoundException("Event type not found") }
+
+        val event = Event(
+            name = name,
+            date = date,
+            club = club,
+            type = type,
+            location = location,
+            description = description
         )
-        events.add(newEvent)
-        return newEvent
+
+        return eventRepository.save(event)
     }
 
     fun updateEvent(event: Event) {
-        val index = events.indexOfFirst { it.id == event.id }
-        if (index != -1) {
-            events[index] = event
+        if (!eventRepository.existsById(event.id)) {
+            throw EntityNotFoundException("Event with id ${event.id} not found")
         }
+        eventRepository.save(event) // save também faz update
     }
 
-
-    fun deleteEvent(id: Long): Unit {
-        val index = events.indexOfFirst { it.id == id }
-       events.removeAt(index)
-        print(events.size)
+    fun deleteEvent(id: Long) {
+        if (!eventRepository.existsById(id)) {
+            throw EntityNotFoundException("Event with id $id not found")
+        }
+        eventRepository.deleteById(id)
     }
 
-    fun nameExists(name: String, clubId: Long): Boolean {
-        return events.any { it.name == name && it.clubId == clubId }
-    }
-    fun nameEditExists(name: String, clubId: Long, excludeId: Long? = null): Boolean {
-        return events.any { it.name == name && it.clubId == clubId && it.id != excludeId }
+    fun nameExists(name: String): Boolean {
+        return eventRepository.existsByNameIgnoreCase(name)
     }
 
+    fun nameEditExists(name: String, excludeId: Long): Boolean {
+        return eventRepository.existsByNameIgnoreCaseAndIdNot(name, excludeId)
+    }
+
+    fun getAllEventsTypes(): List<pt.unl.fct.iadi.novaevents.model.EventType> {
+        return eventTypeRepository.findAll()
+    }
+
+    fun findTypeByName(name: String): pt.unl.fct.iadi.novaevents.model.EventType? {
+        return eventTypeRepository.findByNameIgnoreCase(name)
+    }
+
+    fun eventsCountForAllClubs(clubIds: List<Long>): Map<Long, Long> {
+        val results = eventRepository.countByClubIds(clubIds)
+        val countMap = results.associate { row ->
+            (row[0] as Long) to (row[1] as Long)
+        }
+        return clubIds.associateWith { countMap.getOrDefault(it, 0L) }
+    }
 }

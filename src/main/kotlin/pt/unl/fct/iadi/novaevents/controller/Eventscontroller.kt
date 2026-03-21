@@ -1,17 +1,18 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller
+package pt.unl.fct.iadi.novaevents.controller
 
 import jakarta.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.ui.ModelMap
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
-import pt.unl.fct.iadi.novaevents.controller.dto.EventForm
-import pt.unl.fct.iadi.novaevents.controller.dto.EventUpdateForm
-import pt.unl.fct.iadi.novaevents.controller.dto.EventsResponse
+
 import pt.unl.fct.iadi.novaevents.model.Event
 import pt.unl.fct.iadi.novaevents.model.EventType
 import pt.unl.fct.iadi.novaevents.service.ClubsService
 import pt.unl.fct.iadi.novaevents.service.EventsService
+import pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller.dto.EventForm
+import pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller.dto.EventUpdateForm
+import pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller.dto.EventsResponse
 import java.time.LocalDate
 
 @Controller
@@ -19,13 +20,24 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
 
     @GetMapping("/events")
     fun allEvents(
-        @RequestParam(required = false) type: EventType?,
+        @RequestParam(required = false) type: String?,
         @RequestParam(required = false) clubId: Long?,
         @RequestParam(required = false) start: LocalDate?,
         @RequestParam(required = false) end: LocalDate?,
         model: ModelMap
     ): String {
-        val events = eventsService.getEventsForClub(type, clubId, start, end)
+        val typeId =  type?.let { eventsService.findTypeByName(it)?.id }
+        val events = eventsService.getEventsForClub(typeId, clubId, start, end).map {
+            EventsResponse(
+                id = it.id,
+                name = it.name,
+                clubId = it.club!!.id,
+                clubName = it.club!!.name,
+                date = it.date,
+                type = it.type!!,
+                location = it.location
+            )
+        }
         model["events"] = events
         return "events/listEvents"
     }
@@ -34,7 +46,7 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
         val club = clubService.clubDetails(id)
         model["club"] = club
         model["eventForm"] = EventForm()
-        model["eventTypes"] = EventType.entries.toTypedArray()
+        model["eventTypes"] = eventsService.getAllEventsTypes()
         return "events/form"
     }
 
@@ -47,16 +59,23 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
     ): String {
         if (bindingResult.hasErrors()) {
             model["club"] = clubService.clubDetails(id)
-            model["eventTypes"] = EventType.entries.toTypedArray()
+            model["eventTypes"] = eventsService.getAllEventsTypes()
             return "events/form"
         }
-        if (eventsService.nameExists(form.name!!, id)) {
+        if (eventsService.nameExists(form.name!!)) {
             bindingResult.rejectValue("name", "duplicate", "An event with this name already exists")
             model["club"] = clubService.clubDetails(id)
-            model["eventTypes"] = EventType.entries.toTypedArray()
+            model["eventTypes"] = eventsService.getAllEventsTypes()
             return "events/form"
         }
-        val created = eventsService.createEvent(form, id)
+        val created = eventsService.createEvent(
+            clubId = id,
+            name = form.name,
+            typeId = form.type!!.id,
+            date = form.date!!,
+            location = form.location,
+            description = form.description
+        )
         return "redirect:/clubs/$id/events/${created.id}"
     }
 
@@ -82,7 +101,7 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
             location = event.location,
             description = event.description
         )
-        model["eventTypes"] = EventType.entries.toTypedArray()
+        model["eventTypes"] = eventsService.getAllEventsTypes()
         return "events/editForm"
     }
 
@@ -97,23 +116,23 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
         if (bindingResult.hasErrors()) {
             model["club"] = clubService.clubDetails(id)
             model["event"] = eventsService.findById(eventId)
-            model["eventTypes"] = EventType.entries.toTypedArray()
+            model["eventTypes"] = eventsService.getAllEventsTypes()
             return "events/editForm"
         }
-        if (eventsService.nameEditExists(form.name!!, id, eventId)) {
+        if (eventsService.nameEditExists(form.name!!, eventId)) {
             bindingResult.rejectValue("name", "duplicate", "An event with this name already exists")
             model["club"] = clubService.clubDetails(id)
             model["event"] = eventsService.findById(eventId)
-            model["eventTypes"] = EventType.entries.toTypedArray()
+            model["eventTypes"] =  eventsService.getAllEventsTypes()
             return "events/editForm"
         }
         val event = eventsService.findById(eventId)
         val updatedEvent = Event(
             id = event.id,
-            clubId = event.clubId,
             name = form.name ?: event.name,
             date = form.date ?: event.date,
             type = form.type ?: event.type,
+            club = event.club,
             location = form.location ?: event.location,
             description = form.description ?: event.description
         )
@@ -127,10 +146,10 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
     val eventResponse = EventsResponse(
         id = event.id,
         name = event.name,
-        clubId = event.clubId,
-        clubName = clubService.clubDetails(event.clubId).name,
+        clubId = event.club!!.id,
+        clubName = event.club!!.name,
         date = event.date,
-        type = event.type,
+        type = event.type!!,
         location = event.location
     )
         model["event"] = eventResponse
@@ -153,10 +172,10 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
         val eventResponse = EventsResponse(
             id = event.id,
             name = event.name,
-            clubId = event.clubId,
-            clubName = clubService.clubDetails(event.clubId).name,
+            clubId = event.club!!.id,
+            clubName = event.club!!.name,
             date = event.date,
-            type = event.type,
+            type = event.type!!,
             location = event.location
         )
         model.addAttribute("event", eventResponse)

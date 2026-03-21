@@ -1,22 +1,33 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.model
+package pt.unl.fct.iadi.novaevents.model
 
+import jakarta.persistence.*
 import java.time.LocalDate
 
-data class Event (
-    val id: Long,
-    val clubId: Long,
+@Entity
+data class Event(
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+
     var name: String,
+
     var date: LocalDate,
+
     var location: String? = null,
-    var type: EventType,
-    var description: String? = null
+
+    var description: String? = null,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "club_id")
+    var club: Club ? = null,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id")
+    var type: EventType ? = null
 
 ) {
-    init {
-        require(name.isNotBlank()) { "Name is required" }
-        requireNotNull(date) {
-            "Date is required and must be in the format YYYY-MM-DD"
-            require(type in EventType.values()) { "Event type is required and must be valid" }
-        }
-    }
+    constructor(): this(0, "", LocalDate.now(), null, null, null, null)
+
+
 }

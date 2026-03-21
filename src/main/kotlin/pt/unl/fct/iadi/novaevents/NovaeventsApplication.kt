@@ -1,4 +1,4 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents
+package pt.unl.fct.iadi.novaevents
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class NovaeventsApplication
 
 fun main(args: Array<String>) {
-    runApplication<pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.NovaeventsApplication>(*args)
+    runApplication<NovaeventsApplication>(*args)
 }

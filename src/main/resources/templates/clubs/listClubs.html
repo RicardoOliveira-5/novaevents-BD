@@ -24,6 +24,7 @@
             <th>Name</th>
             <th>Category</th>
             <th>Description</th>
+            <th> Events</th>
             <th>Details</th>
         </tr>
         </thead>
@@ -46,6 +47,7 @@
                     <p th:text="${club.description}"></p>
                 </details>
             </td>
+            <td th:text="${eventsCount[club.id] ?: 0}"></td>
 
             <td>
                 <a class="btn btn-primary btn-sm"

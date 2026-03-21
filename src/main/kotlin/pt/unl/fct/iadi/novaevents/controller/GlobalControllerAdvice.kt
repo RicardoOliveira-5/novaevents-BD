@@ -1,4 +1,4 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller
+package pt.unl.fct.iadi.novaevents.controller
 
 import org.springframework.http.HttpStatus
 import org.springframework.ui.Model
@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.ResponseStatus
 import pt.unl.fct.iadi.novaevents.model.EventType
-import pt.unl.fct.iadi.novaevents.service.ClubNotFoundException
+import pt.unl.fct.iadi.novaevents.service.EventsService
+import pt.unl.fct.iadi.service.ClubNotFoundException
+
 
 @ControllerAdvice
-class GlobalControllerAdvice {
+class GlobalControllerAdvice(private val eventsService: EventsService) {
 
     @ExceptionHandler(ClubNotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -27,5 +29,5 @@ class GlobalControllerAdvice {
     }
 
     @ModelAttribute("eventTypes")
-    fun eventTypes() = EventType.entries.toTypedArray()
+    fun eventTypes() = eventsService.getAllEventsTypes()
 }

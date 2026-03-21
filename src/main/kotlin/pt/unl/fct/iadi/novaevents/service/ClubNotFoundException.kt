@@ -1,3 +1,3 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.service
+package pt.unl.fct.iadi.service
 
 class ClubNotFoundException (message: String) : RuntimeException(message)

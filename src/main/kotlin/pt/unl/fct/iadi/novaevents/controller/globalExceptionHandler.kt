@@ -1,11 +1,11 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller
+package pt.unl.fct.iadi.novaevents.controller
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
-import pt.unl.fct.iadi.novaevents.service.ClubNotFoundException
 import pt.unl.fct.iadi.novaevents.service.EventNotFoundException
+import pt.unl.fct.iadi.service.ClubNotFoundException
 
 
 data class ApiError(val error: String, val message: String)

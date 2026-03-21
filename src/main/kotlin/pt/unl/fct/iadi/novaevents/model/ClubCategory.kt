@@ -1,4 +1,4 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.model
+package pt.unl.fct.iadi.novaevents.model
 
 enum class ClubCategory {
     TECHNOLOGY,
