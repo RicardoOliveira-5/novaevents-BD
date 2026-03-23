@@ -3,7 +3,7 @@ package pt.unl.fct.iadi.novaevents.model
 import jakarta.persistence.*
 
 @Entity
-data class EventType(
+class EventType(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 

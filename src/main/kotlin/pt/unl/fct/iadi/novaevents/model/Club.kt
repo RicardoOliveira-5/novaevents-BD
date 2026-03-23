@@ -10,7 +10,7 @@ import jakarta.persistence.Id
 
 
 @Entity
-data class Club(
+class Club(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
