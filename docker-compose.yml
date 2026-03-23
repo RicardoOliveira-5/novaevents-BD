@@ -4,10 +4,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
       MYSQL_DATABASE: novaevents
-      MYSQL_USER: Ricardo
-      MYSQL_PASSWORD: Ricardo
-      MYSQL_ROOT_HOST: '%'
-    command: --default-authentication-plugin=mysql_native_password
+      MYSQL_USER: novaeventsuser
+      MYSQL_PASSWORD: novaeventspassword
     ports:
       - "3306:3306"
     volumes:
