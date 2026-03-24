@@ -18,10 +18,10 @@ class Club(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
 
-    var name: String,
+    var name: String = "",
 
     @Column(length = 2000)
-    var description: String,
+    var description: String = "",
 
     @Enumerated(EnumType.STRING)
     var category: ClubCategory =  ClubCategory.SOCIAL

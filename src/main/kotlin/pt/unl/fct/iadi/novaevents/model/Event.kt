@@ -11,9 +11,9 @@ class Event(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
 
-    var name: String,
+    var name: String = "",
 
-    var date: LocalDate,
+    var date: LocalDate = LocalDate.now(),
 
     var location: String? = null,
 
