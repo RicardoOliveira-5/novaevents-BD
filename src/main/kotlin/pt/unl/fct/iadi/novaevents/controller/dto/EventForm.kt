@@ -1,4 +1,4 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller.dto
+package pt.unl.fct.iadi.novaevents.controller.dto
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -13,7 +13,7 @@ data class EventForm(
     val date: LocalDate? = null,
 
     @field:NotNull(message = "Event type is required")
-    val type: EventType? = null,
+    val type: String? = null,
 
     val location: String? = null,
     val description: String? = null

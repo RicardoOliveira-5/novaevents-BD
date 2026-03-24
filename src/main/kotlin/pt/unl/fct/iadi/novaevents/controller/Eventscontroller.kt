@@ -5,14 +5,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.ModelMap
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
+import pt.unl.fct.iadi.novaevents.controller.dto.EventForm
+import pt.unl.fct.iadi.novaevents.controller.dto.EventsResponse
 
 import pt.unl.fct.iadi.novaevents.model.Event
-import pt.unl.fct.iadi.novaevents.model.EventType
 import pt.unl.fct.iadi.novaevents.service.ClubsService
 import pt.unl.fct.iadi.novaevents.service.EventsService
-import pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller.dto.EventForm
 import pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller.dto.EventUpdateForm
-import pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller.dto.EventsResponse
 import java.time.LocalDate
 
 @Controller
@@ -68,10 +67,11 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
             model["eventTypes"] = eventsService.getAllEventsTypes()
             return "events/form"
         }
+
         val created = eventsService.createEvent(
             clubId = id,
             name = form.name,
-            typeId = form.type!!.id,
+            typeId = form.type!!.toLong(),
             date = form.date!!,
             location = form.location,
             description = form.description
@@ -87,7 +87,7 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
         val eventForm = EventForm(
             name = event.name,
             date = event.date,
-            type = event.type,
+            type = event.type?.id?.toString(),
             location = event.location,
             description = event.description
         )

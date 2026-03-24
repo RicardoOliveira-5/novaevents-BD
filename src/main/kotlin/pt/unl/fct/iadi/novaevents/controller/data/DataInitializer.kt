@@ -37,13 +37,13 @@ class DataInitializer(
                 category = ClubCategory.SOCIAL
             )
         )
-        val robotics = clubRepository.save(Club(name = "Robotics Club", description = "The Robotics club is a place to turn ideas into machines", category = ClubCategory.ACADEMIC))
+        val robotics = clubRepository.save(Club(name = "Robotics Club", description = "The Robotics Club is the place to turn ideas into machines", category = ClubCategory.ACADEMIC))
         val photography = clubRepository.save(Club(name = "Photography Club", description = "For photography lovers", category = ClubCategory.CULTURAL))
         val hiking = clubRepository.save(Club(name = "Hiking & Outdoors Club", description = "Hiking and outdoor adventures", category = ClubCategory.SPORTS))
         val film = clubRepository.save(Club(name = "Film Society Club", description = "Film screenings and discussions", category = ClubCategory.CULTURAL))
 
         // 3️⃣ Events
-        eventRepository.save(Event(name = "Beginner Chess Workshop", date = LocalDate.now().plusDays(1), club = chess, type = workshop, location = "Room A101"))
+        eventRepository.save(Event(name = "Beginner's Chess Workshop", date = LocalDate.now().plusDays(1), club = chess, type = workshop, location = "Room A101"))
         eventRepository.save(
             Event(
                 name = "Spring Chess Tournament",
