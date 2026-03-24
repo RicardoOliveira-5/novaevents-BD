@@ -14,15 +14,15 @@ class Club(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long = 0,
 
-    val name: String,
+    var name: String,
 
     @Column(length = 2000)
-    val description: String,
+    var description: String,
 
     @Enumerated(EnumType.STRING)
-    val category: ClubCategory =  ClubCategory.SOCIAL
+    var category: ClubCategory =  ClubCategory.SOCIAL
 ) {
 
         constructor(): this(0, "", "", ClubCategory.SOCIAL)
