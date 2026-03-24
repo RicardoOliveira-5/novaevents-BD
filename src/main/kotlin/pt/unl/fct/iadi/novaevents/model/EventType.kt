@@ -10,6 +10,5 @@ class EventType(
 
     var name: String = ""
 ) {
-    // Hibernate precisa de um construtor vazio
     constructor(): this(0, "")
 }
