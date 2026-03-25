@@ -6,12 +6,12 @@ import org.springframework.ui.ModelMap
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
 import pt.unl.fct.iadi.novaevents.controller.dto.EventForm
+import pt.unl.fct.iadi.novaevents.controller.dto.EventUpdateForm
 import pt.unl.fct.iadi.novaevents.controller.dto.EventsResponse
 
 import pt.unl.fct.iadi.novaevents.model.Event
 import pt.unl.fct.iadi.novaevents.service.ClubsService
 import pt.unl.fct.iadi.novaevents.service.EventsService
-import pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller.dto.EventUpdateForm
 import java.time.LocalDate
 
 @Controller
@@ -101,7 +101,7 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
         model["eventUpdateForm"] = EventUpdateForm(
             name = event.name,
             date = event.date,
-            type = event.type,
+            type = event.type?.name,
             location = event.location,
             description = event.description
         )
@@ -127,21 +127,29 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
             bindingResult.rejectValue("name", "duplicate", "An event with this name already exists")
             model["club"] = clubService.clubDetails(id)
             model["event"] = eventsService.findById(eventId)
-            model["eventTypes"] =  eventsService.getAllEventsTypes()
+            model["eventTypes"] = eventsService.getAllEventsTypes()
             return "events/editForm"
         }
+
         val event = eventsService.findById(eventId)
+
+        // converte o type de String para EventType
+        val newType = form.type?.toLongOrNull()
+            ?.let { eventsService.getAllEventsTypes().find { t -> t.id == it } }
+            ?: form.type?.let { eventsService.findTypeByName(it) }
+            ?: event.type
+
         val updatedEvent = Event(
             id = event.id,
             name = form.name ?: event.name,
             date = form.date ?: event.date,
-            type = form.type ?: event.type,
+            type = newType,
             club = event.club,
             location = form.location ?: event.location,
             description = form.description ?: event.description
         )
         eventsService.updateEvent(updatedEvent)
-        return "redirect:/clubs/$id/events/${updatedEvent.id}"
+        return "redirect:/clubs/$id"  // era redirect:/clubs/$id/events/${updatedEvent.id}
     }
 
 @GetMapping("/clubs/{id}/events/{eventId}")

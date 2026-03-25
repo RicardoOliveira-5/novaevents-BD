@@ -1,4 +1,4 @@
-package pt.unl.fct.iadi.pt.unl.fct.iadi.novaevents.controller.dto
+package pt.unl.fct.iadi.novaevents.controller.dto
 
 import org.springframework.format.annotation.DateTimeFormat
 import pt.unl.fct.iadi.novaevents.model.EventType
@@ -10,7 +10,7 @@ data class EventUpdateForm(
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     val date: LocalDate? = null,
 
-    val type: EventType? = null,
+    val type: String? = null,
 
     val location: String? = null,
     val description: String? = null
