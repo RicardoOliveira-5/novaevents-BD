@@ -68,10 +68,14 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
             return "events/form"
         }
 
+        val typeId = form.type!!.toLongOrNull()
+            ?: eventsService.findTypeByName(form.type!!)?.id
+            ?: throw IllegalArgumentException("Unknown event type: ${form.type}")
+
         val created = eventsService.createEvent(
             clubId = id,
             name = form.name,
-            typeId = form.type!!.toLong(),
+            typeId = typeId,
             date = form.date!!,
             location = form.location,
             description = form.description

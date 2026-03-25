@@ -21,7 +21,7 @@ class EventsService(
         start: LocalDate?,
         end: LocalDate?
     ): List<Event> {
-        var events = eventRepository.findAll()
+        var events = eventRepository.findAllWithDetails()
 
         if (clubId != null) events = events.filter { it.club?.id == clubId }
         if (typeId != null) events = events.filter { it.type?.id == typeId }

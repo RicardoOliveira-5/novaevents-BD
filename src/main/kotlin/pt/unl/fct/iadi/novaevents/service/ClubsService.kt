@@ -24,7 +24,7 @@ class ClubsService(
      */
 
     fun getAllClubs(): List<Club> {
-        return clubRepository.findAll()
+        return clubRepository.findAllWithEvents()
     }
     fun clubDetails(clubId: Long?): Club {
         return clubId?.let { id ->

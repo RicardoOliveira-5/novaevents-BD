@@ -13,7 +13,6 @@ interface EventRepository : JpaRepository<Event, Long> {
     @Query("SELECT e.club.id, COUNT(e) FROM Event e WHERE e.club.id IN :clubIds GROUP BY e.club.id")
     fun countByClubIds(@Param("clubIds") clubIds: List<Long>): List<Array<Any>>
 
-    fun findByClubId(clubId: Long): List<Event>
-    fun findByTypeId(typeId: Long): List<Event>
-    fun findByClubIdAndTypeId(clubId: Long, typeId: Long): List<Event>
+    @Query("SELECT e FROM Event e LEFT JOIN FETCH e.type LEFT JOIN FETCH e.club")
+    fun findAllWithDetails(): List<Event>
 }
