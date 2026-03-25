@@ -6,6 +6,6 @@ import pt.unl.fct.iadi.novaevents.model.Club
 
 interface ClubRepository : JpaRepository<Club, Long> {
 
-    @Query("SELECT c FROM Club c LEFT JOIN FETCH c.events")
+    @Query("SELECT DISTINCT c FROM Club c LEFT JOIN FETCH c.events e LEFT JOIN FETCH e.type")
     fun findAllWithEvents(): List<Club>
 }

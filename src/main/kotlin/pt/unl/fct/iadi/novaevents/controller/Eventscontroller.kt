@@ -133,7 +133,6 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
 
         val event = eventsService.findById(eventId)
 
-        // converte o type de String para EventType
         val newType = form.type?.toLongOrNull()
             ?.let { eventsService.getAllEventsTypes().find { t -> t.id == it } }
             ?: form.type?.let { eventsService.findTypeByName(it) }
@@ -149,7 +148,7 @@ class Eventscontroller(private val eventsService: EventsService, private val clu
             description = form.description ?: event.description
         )
         eventsService.updateEvent(updatedEvent)
-        return "redirect:/clubs/$id"  // era redirect:/clubs/$id/events/${updatedEvent.id}
+        return "redirect:/clubs/$id/events/${updatedEvent.id}"
     }
 
 @GetMapping("/clubs/{id}/events/{eventId}")
