@@ -4,11 +4,12 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
-
 
 @Entity
 @Table(name = "clubs")
@@ -24,9 +25,11 @@ class Club(
     var description: String = "",
 
     @Enumerated(EnumType.STRING)
-    var category: ClubCategory =  ClubCategory.SOCIAL
+    var category: ClubCategory = ClubCategory.SOCIAL,
+
+    @OneToMany(mappedBy = "club", fetch = FetchType.LAZY)
+    var events: MutableList<Event> = mutableListOf()
+
 ) {
-
-        constructor(): this(0, "", "", ClubCategory.SOCIAL)
-
+    constructor(): this(0, "", "", ClubCategory.SOCIAL, mutableListOf())
 }
