@@ -17,7 +17,7 @@ class ClubsController(private val clubService: ClubsService, val eventsService: 
     @GetMapping()
     fun listClubs(model: ModelMap): String {
         val clubs = clubService.getAllClubs()
-        val eventsCount = eventsService.eventsCountForAllClubs(clubs.map { it.id })
+        val eventsCount = clubs.associate { it.id to it.events.size.toLong() }
         model["clubs"] = clubs
         model["eventsCount"] = eventsCount
         return "clubs/listClubs"
